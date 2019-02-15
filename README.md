@@ -39,11 +39,15 @@ The [Approach](Approach.md) will provide guidelines to create and access the EC2
 ## EC2 structure of the Mojaloop testing environment
 ##### Files to copy to the EC2 instance (These were the filenames we used)
 ```
+testMojaloop.sh
+env.sh
 postmanTestMojaloop.sh
-Mojaloop-Sandbox.postman_environment.json
+sendMail.sh
+uploadReports.sh
+sendSlack.sh
+/environments/Mojaloop-Sandbox.postman_environment.json
+/environments/newmanReportTemplate.hbs
 /Docker/Dockerfile
-/Docker/docker-compose.yml
-/Scripts/newmanReportTemplate.hbs
 ``` 
 ##### Command to copy the local environment file to the EC2 Testing instance
 ```
@@ -53,17 +57,13 @@ scp -i <pemfilename.pem> "/Users/<UserID>/<environmentfile>" ec2-user@<ec2-insta
 ```
 scp -i <pemfilename.pem> "/Users/<UserID>/<Dockerfile>" ec2-user@<ec2-instance>:~
 ```
-##### Docker-compose file
-```
-scp -i <pemfilename.pem> "/Users/<UserID>/<DockerComposefile>" ec2-user@<ec2-instance>:~
-```
 ##### Newman HTML report template file
 ```
 scp -i <pemfilename.pem> "/Users/<UserID>/<reportTemplateFile.hbs>" ec2-user@<ec2-instance>:~
 ```
-##### Copy bash script to EC2
+##### Copy bash scripts to EC2
 ```
-scp -i <pemfilename.pem> "/Users/<UserID>/<bashScriptFile>" ec2-user@<ec2-instance>:~
+scp -i <pemfilename.pem> /Users/<UserID>/*.sh ec2-user@<ec2-instance>:~
 ```
 ##### Start the Docker Service
 ```
@@ -74,7 +74,7 @@ Note - If the server was stopped and restarted, the Docker daemon will not be ru
 ```
 [ec2-user ~]$ sudo usermod -a -G docker ec2-user
 ```
-##### Build Image from Dockerfile - Use docker file to obtain the latest required images an build a new image (using your own versioning system) with the following:
+##### You can name the image anything you like. Just remember to ensure the name of the image you use is updated in the script where it is referenced. Build Image from Dockerfile - Use docker file to obtain the latest required images an build a new image (using your own versioning system) with the following:
 ```
 docker build -t <UserID>/docker-newman:1 .
 ```
@@ -91,10 +91,10 @@ Postman regression test can be executed by either instantiating a docker contain
 ```
 sudo docker run -v=/home/ec2-user/<local-location>:/<remote-location> -t postman/<docker-image-name> run <postman-collection-URL> -e /environments/,environment-name.json. -n 1 --bail
 ```
-##### Execute Postman
-  Running the script, will in turn run the commands via an instantiated Docker container
+##### Execute the bash script to run the newman / postman test
+Running the script, will in turn run the commands via an instantiated Docker container
 ```
-./<bashScripName.sh> <postman-collection-URL> <number-of iterations> <boolean-for exit-at-first-error> <comma-separated-email-recipient-list>
+./testMojaloop.sh <postman-collection-URL> <comma-separated-email-recipient-list>
 ```
 ##### Verifying regression test results
 Test for exit code result with grep in a bash script - test for exit code (1) indicating failure and execute a command (like sending out email)
@@ -141,11 +141,6 @@ Usage: run <collection> [options]
     --ssl-client-passphrase <path>  Specify the Client SSL passphrase (optional, needed for passphrase protected keys).
     -h, --help                      output usage information
 ```
-##### Execute the bash script to run the newman / postman test
-```
-./<bashScripName.sh> <postman-collection-URL> <number-of iterations> <boolean-for exit-at-first-error> <comma-separated-email-recipient-list>
-```
-
 ## Automation and scheduling
 Regression testing process can be automated by setting up a cron-job.
 

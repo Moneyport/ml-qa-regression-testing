@@ -3,108 +3,69 @@
 # Script to execute the newman CLI interface initiating the execution of a Postman Collection
 #
 
-if [ $# -eq 0 ]
-then
-echo "$0 : You must give/supply the [URL to the postman collection], [the number of times to run the test], [true] to exit at the first error or [false] to continue to the end and lastly, a string containing a semi-colon separated list of email addresses."
-exit 1
-fi
+source envSettings.sh
 
-echo "Running Postman Collection: $1"
-echo "Iterations: $2"
-echo "Exit at first Error: $3"
-echo "Email Recipient List: $4"
+DOCKER_NETWORK='QA_NETWORK'
+SIM_HOST='QA_SIMULATOR'
+SIM_IMAGE='mojaloop/simulator'
+SIM_TAG='v1.0.6-snapshot'
+NEWMAN_HOST='QA_NEWMAN'
+NEWMAN_IMAGE='nicod/docker-newman'
+NEWMAN_TAG='2'
 
-# Settings
-timestamp=$(date +"%s")
-collection=$1
-emailList='$4'
-env=/environments/Mojaloop-Sandbox.postman_environment.json
-executionDateTime=`date +"%Y-%m-%d %T"`
-
-# create separate outfile for each run
-outfile=/var/www/myapp/tests/report-$timestamp.json
+echo "Running Postman Collection: $collection"
 
 echo Executed at: ${executionDateTime}
 
-get_mimetype()
+create_network()
 {
-  Xfname="$1"
-  [ "$Xfname" = "" ] && echo "usage:$0 fname" >&2 && return 1
-  [ ! -f "$Xfname" ] && echo "no file $Xfname" >&2 && return 2
-  mtype=$(file --mime-type "$Xfname" )
-  mtype=${mtype##* } # take last value from the answer, space is delim.
-  echo "$mtype"
+    docker network create $DOCKER_NETWORK
 }
 
-# Start Simulators
-#sudo docker run -p 8444:8444 -t mojaloop/simulator:v1.0.6-snapshot
+run_test_simulator() {
+ >&2 echo "Running $SIM_HOST"
+ docker run -itd --rm \
+   --network $DOCKER_NETWORK \
+   --name $SIM_HOST \
+   -p 8444:8444 \
+   $SIM_IMAGE:$SIM_TAG
+}
 
-#cn=$(docker ps -al | awk '{print $1}')
+run_test_newman() {
+ >&2 echo "Running $NEWMAN_HOST"
+ docker run -it --rm \
+   --link $SIM_HOST \
+   --network $DOCKER_NETWORK \
+   --name $NEWMAN_HOST \
+   --env collection=$collection \
+   --env env=$env \
+   --env outfile=$outfile \
+   -v=/home/ec2-user/environments:/environments \
+   $NEWMAN_IMAGE:$NEWMAN_TAG \
+   /bin/sh \
+   -c "newman run $collection -e $env --delay-request 1000 --reporters cli,html --reporter-html-export /environments/$outfile --reporter-html-template /environments/newmanReportTemplate.hbs"
+}
 
-if test $3 == true
-then
-	command=sudo docker run -v=/home/ec2-user/environments:/environments -t nicod/docker-newman:1 run $collection --folder "pm_happy_path" -e $env --delay-request 1000 --reporters cli,html --reporter-html-export /environments/report.html --reporter-html-template /environments/newmanReportTemplate.hbs -n $2 --bail
-else
-	command=sudo docker run -v=/home/ec2-user/environments:/environments -t nicod/docker-newman:1 run $collection --folder "pm_happy_path" -e $env --delay-request 1000 --reporters cli,html --reporter-html-export /environments/report.html --reporter-html-template /environments/newmanReportTemplate.hbs -n $2
-fi
+stop_docker() {
+  #>&1 echo "$SIM_HOST is shutting down"
+  #(docker stop $SIM_HOST && docker rm $SIM_HOST) > /dev/null 2>&1
+  >&1 echo "$NEWMAN_HOST environment is shutting down"
+  (docker stop $NEWMAN_HOST && docker rm $NEWMAN_HOST) > /dev/null 2>&1
+  >&1 echo "Deleting test network: $DOCKER_NETWORK"
+  docker network rm $DOCKER_NETWORK
+}
 
-# If you want to send email based on a prepared file containing all parameters
-#docker ps -al | grep -q 'Exited (0)' && /usr/sbin/sendmail -t < ./email/email-pass.txt
-#docker ps -al | grep -q 'Exited (1)' && /usr/sbin/sendmail -t < ./email/email-fail.txt
+clean_docker() {
+  stop_docker
+}
 
-# Stop Simulators
-#sudo docker stop $cn
+create_network
+#run_test_simulator
+run_test_newman
 
-# Format subject line for email based on success/failure of test run
-docker ps -al | grep -q 'Exited (0)' && subjectLine='QA-Regression Testing - PASSED'
-docker ps -al | grep -q 'Exited (1)' && subjectLine='QA-Regression Testing - FAILED'
+test_exit_code=$?
 
-# Format email and distribute
-from='awsoeasy.info'
-to=$4
-#subject=''
-boundary="ZZ_/afg6432dfgkl.94531q"
-body='Your test Report attached'
-declare -a attachments
-attachments=("./environments/report.html")
+clean_docker
 
-# Build headers
-{
-
-printf '%s\n' "From: $from
-To: $to
-Subject: $subjectLine
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=\"$boundary\"
-
---${boundary}
-Content-Type: text/plain; charset=\"US-ASCII\"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-$body
-"
-
-# now loop over the attachments, guess the type
-# and produce the corresponding part, encoded base64
-for file in "${attachments[@]}"; do
-
-  [ ! -f "$file" ] && echo "Warning: attachment $file not found, skipping" >&2 && continue
-
-  mimetype=$(get_mimetype "$file")
-
-  printf '%s\n' "--${boundary}
-Content-Type: $mimetype
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename=\"$file\"
-"
-
-  base64 "$file"
-  echo
-done
-
-# print last boundary with closing --
-printf '%s\n' "--${boundary}--"
-
-} | /usr/sbin/sendmail -t -oi   # one may also use -f here to set the envelope-from
+exit $test_exit_code
 

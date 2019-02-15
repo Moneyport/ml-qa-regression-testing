@@ -96,7 +96,7 @@ dig -t mx awsoeasy.info
 ```
 
 ##### Set the HOSTNAME
-Copy domain name from above and to allow SMT to match hostname, edit file and set the HOSTNAME = to domain copied above.    
+Copy domain name from above and to allow SMTP to match hostname, edit file and set the HOSTNAME = to domain copied above.    
 ```
 vi /etc/sysconfig/network
 ```
