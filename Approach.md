@@ -1,13 +1,13 @@
 # ml-qa-regression-testing Setup
 This document will provide guidelines to setup the Amazon EC2 regression testing instance on AWS.
 
-Contents:
-- [Software List](#software list)
-- [Access and setup](#access and setup)
-- [Install Docker](#install docker)
-- [Known issues](#known issues)
+**Contents**:
+- [Software List](#software-list)
+- [Access and setup](#access-and-setup)
+- [Install Docker](#install-docker)
+- [Known issues](#known-issues)
 
-## Possible Software used in the creation of the regression setup
+## Software list
 1. Github
 1. Docker
 1. Postman
