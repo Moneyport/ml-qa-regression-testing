@@ -13,15 +13,26 @@ export collection=$1
 export emailList=$2
 export timestamp=$(date +"%s")
 
-source envSettings.sh
+source $(pwd)/envSettings.sh
 
+echo "*** START QA and REGRESSION RUN ***"
 echo "Running Postman Collection: $1"
 echo "Email Recipient List: $2"
 
-sh ./postmanTestMojaloop.sh
+echo "TimeStamp: $timestamp"
+
+echo "*** Starting NEWMAN ***"
+sh $(pwd)/postmanTestMojaloop.sh
 
 export test_pass_fail=$?
 
-sh ./sendMail.sh
-sh ./uploadReports.sh
-sh ./sendSlack.sh
+echo "*** Sending Email ***"
+sh $(pwd)/sendMail.sh
+
+echo "*** Uploading results to S3 ***"
+sh $(pwd)/uploadReports.sh
+
+echo "*** Notification to SLACK ***"
+sh $(pwd)/sendSlack.sh
+
+echo "*** COMPLETED RUN ***"

@@ -4,7 +4,7 @@
 # refactoring the script such that all these values are
 # passed from the outside as arguments should be easy
 
-source envSettings.sh
+source $(pwd)/envSettings.sh
 
 # Format email and distribute
 from='awsoeasy.info'
@@ -13,7 +13,7 @@ to=$emailList
 boundary="ZZ_/afg6432dfgkl.94531q"
 body='The attached file contains the results of this QA-Regression Run'
 declare -a attachments
-attachments=("./environments/$outfile")
+attachments=("$(pwd)/environments/$outfile")
 
 echo outfile=$outfile
 echo emailList=$emailList
@@ -30,9 +30,9 @@ get_mimetype()
 
 if [ $test_pass_fail -eq 0 ]
 then
-    subjectLine='QA-Regression Testing - PASSED'
+    subjectLine="QA-Regression Report for $collection at $executionDateTime - PASSED"
 else
-    subjectLine='QA-Regression Testing - FAILED'
+    subjectLine="QA-Regression Report for $collection at $executionDateTime - FAILED"
 fi
 
 # Build headers

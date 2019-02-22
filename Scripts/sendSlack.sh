@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source envSettings.sh
+source $(pwd)/envSettings.sh
 
 if [ $test_pass_fail -eq 0 ]
 then
@@ -14,7 +14,7 @@ curl -X POST \
   -H 'Content-type: application/json' \
   -H 'cache-control: no-cache' \
   -d "{
-  \"text\": \"*QA Framework test results* for *$executionDateTime* - \`$testResult\`\",
+  \"text\": \"*QA-Regression Report* for $collection at *$executionDateTime* - \`$testResult\`\",
   \"attachments\": [
     {
       \"fallback\": \"View QA and Regression test results @ $MOJALOOP_OSS_RESULT_URL/$outfile\",
