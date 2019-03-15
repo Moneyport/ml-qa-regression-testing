@@ -38,19 +38,14 @@ The [Approach](Approach.md) will provide guidelines to create and access the EC2
 ##### Files to copy to the EC2 instance (These were the filenames we used)
 ```
 testMojaloop.sh
-env.sh
+envSettings.sh
 postmanTestMojaloop.sh
 sendMail.sh
 uploadReports.sh
 sendSlack.sh
-/environments/Mojaloop-Sandbox.postman_environment.json
 /environments/newmanReportTemplate.hbs
 /Docker/Dockerfile
 ``` 
-##### Command to copy the local environment file to the EC2 Testing instance
-```
-scp -i <pemfilename.pem> "/Users/<UserID>/<environmentfile>" ec2-user@<ec2-instance>:~
-```
 ##### Docker file
 ```
 scp -i <pemfilename.pem> "/Users/<UserID>/<Dockerfile>" ec2-user@<ec2-instance>:~
@@ -84,15 +79,24 @@ sudo usermod -a -G docker ec2-user
 
 ## Executing regression test
 Postman regression test can be executed by either instantiating a docker container or running a script(s).
-##### Instantiating a Docker container - ensure your image was created with the "default run command"
+##### Instantiating a Docker container on your LOCAL machine - ensure your image was created with the "default run command"
  Creation of an image containing all the required installations - via Newman CLI
+ This procedure will create a Docker Container on your local machine with all the required internal processes required in order to run a Postman (CLI) test with Newman. You would need to "exec -it" into the container to run the required Newman command from a terminal. 
 ```
-sudo docker run -v=/home/ec2-user/<local-location>:/<remote-location> -t postman/<docker-image-name> run <postman-collection-URL> -e /environments/,environment-name.json. -n 1 --bail
+sudo docker run -v=/home/ec2-user/<local-location>:/<remote-location> -t postman/<docker-image-name> run <postman-collection-URL> -e /environments/environment-name.json -n 1 --bail
 ```
 ##### Execute the bash script to run the newman / postman test
-Running the script, will in turn run the commands via an instantiated Docker container
+To run a test via this method, you will have to be in posession of the PEM-file of the server on which the Mojaloop QA and Regression Framework was deployed on an EC2 instance on Amazon Cloud. 
+
+SSH into the specific EC2 instance and when running the script, it will in turn run the commands via an instantiated Docker container.
+
+You will notice that by using this approach where both the URLs for the Postman-Collection and Environment File are required as input parameters (together with a comma-delimited email recipient list for the report) you have total freedom of executing any Postman Collection you choose.
+ 
+Also, by having an Environment File, the specific Mojaloop services targeted can be on any server. This means you can execute any Postman test against any Mojaloop installation on any server of your choice.
+ 
+The EC2 instance we execute these tests from are merely containing all the tools and processes in order to execute your required test and does not host any Mojaloop Services as such.
 ```
-./testMojaloop.sh <postman-collection-URL> <comma-separated-email-recipient-list>
+./testMojaloop.sh <postman-collection-URL> <environment-URL> <comma-separated-email-recipient-list>
 ```
 ##### Verifying regression test results
 Test for exit code result with grep in a bash script - test for exit code (1) indicating failure and execute a command (like sending out email)

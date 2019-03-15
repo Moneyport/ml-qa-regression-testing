@@ -14,7 +14,7 @@ curl -X POST \
   -H 'Content-type: application/json' \
   -H 'cache-control: no-cache' \
   -d "{
-  \"text\": \"*QA-Regression Report* for $collection at *$executionDateTime* - \`$testResult\`\",
+  \"text\": \"*QA-Regression Report* for $collection on $environment at *$executionDateTime* - \`$testResult\`\",
   \"attachments\": [
     {
       \"fallback\": \"View QA and Regression test results @ $MOJALOOP_OSS_RESULT_URL/$outfile\",

@@ -20,7 +20,7 @@ This document will provide guidelines to setup the Amazon EC2 regression testing
 1. Linux (on AWS instance used) 
 
 ## Access and setup
-Guidelines on how to setup the EC2 testing environment, the installations and configurations requirements.
+Guidelines on how to setup the EC2 testing environment, the installation and configuration requirements.
 
 ##### AWS - EC2 Instance Detail
  To access your instance:
