@@ -30,9 +30,9 @@ get_mimetype()
 
 if [ $test_pass_fail -eq 0 ]
 then
-    subjectLine="QA-Regression Report for $collection at $executionDateTime - PASSED"
+    subjectLine="QA-Regression Report for $collection on $environment at $executionDateTime - PASSED"
 else
-    subjectLine="QA-Regression Report for $collection at $executionDateTime - FAILED"
+    subjectLine="QA-Regression Report for $collection on $environment at $executionDateTime - FAILED"
 fi
 
 # Build headers

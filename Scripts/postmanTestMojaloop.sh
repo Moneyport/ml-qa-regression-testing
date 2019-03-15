@@ -40,12 +40,12 @@ run_test_newman() {
    --network $DOCKER_NETWORK \
    --name $NEWMAN_HOST \
    --env collection=$collection \
-   --env env=$env \
+   --env environment=$environment \
    --env outfile=$outfile \
    -v=$(pwd)/environments:/environments \
    $NEWMAN_IMAGE:$NEWMAN_TAG \
    /bin/sh \
-   -c "newman run $collection -e $env --delay-request 1000 --reporters cli,html --reporter-html-export /environments/$outfile --reporter-html-template /environments/newmanReportTemplate.hbs"
+   -c "newman run $collection -e $environment --delay-request 1000 --reporters cli,html --reporter-html-export /environments/$outfile --reporter-html-template /environments/newmanReportTemplate.hbs"
 }
 
 stop_docker() {
