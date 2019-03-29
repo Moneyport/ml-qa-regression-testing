@@ -2,7 +2,7 @@
 
 Postman is used to test the functional aspects of the mojaloop system. In order to automate this process specifically for the Scheduled Daily test cycle, Newman is used, which is a Node Package that interacts directly with Postman in the background and in turn, exposes testing interaction via a command line interface (CLI).
 
-#Parameter Requirements
+## Parameter Requirements
 The entire process can then be driven by bash scripts and when triggered (manually or scheduled by a cron-job) creates a Docker container from a predefined image (please see <DockerFile>). The environment is then prepared for the run by taking the required input parameters:
  1) Postman Collection to execute
  1) Environment file to use which specifies the specific Mojaloop Implementation to execute against
@@ -11,7 +11,7 @@ The entire process can then be driven by bash scripts and when triggered (manual
 
 The only input required for executing a test, will be the parameters defined above. The entire process is fully automated and integrated.
 
-#QA Automation Process
+## QA Automation Process
 When the Notification flag parameter is on (1), the process starts by:
  1) preparing the runtime environment, 
  1) spinning up a Docker Container,
@@ -21,7 +21,7 @@ When the Notification flag parameter is on (1), the process starts by:
  1) sending out an email, attaching the report,
  1) interfacing with Slack by uploading the report to a predefined Slack Channel and indicating the success or failure as well as the input parameters used for the run.
  
-#Slack Notification Integration
+## Slack Notification Integration
 In order to get the Slack integration to work, do the following:
  1) first create a dedicated Slack Channel,
  1) Create a Slack app (if you don't already have one) - SlackBot
@@ -32,8 +32,8 @@ In order to get the Slack integration to work, do the following:
  
 Below is the bash script used to automate the sending of the generated test report to the dedicated slack channel. Please note that the SLACK_WEBHOOK_ANNOUNCEMENT value is an environment variable defined which will be specific to your Slack Channel.
 
-#Integration Code
-/#!/usr/bin/env bash
+## Integration Code
+\#!/usr/bin/env bash
 
 source $(pwd)/envSettings.sh
 
