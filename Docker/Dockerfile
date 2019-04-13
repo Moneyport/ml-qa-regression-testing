@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 LABEL maintainer="Nico Duvenage <nico@modusbox.com>"
 
 ARG NODE_VERSION=10
-ARG NEWMAN_VERSION=4.2.2
+ARG NEWMAN_VERSION=4.4.1
 
 # Bail out early if NODE_VERSION is not provided
 RUN if [ ! $(echo $NEWMAN_VERSION | grep -oE "^[0-9]+\.[0-9]+\.[0-9]+$") ]; then \

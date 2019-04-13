@@ -34,18 +34,18 @@ run_test_simulator() {
 }
 
 run_test_newman() {
- echo "Running $NEWMAN_HOST"
- docker run -i --rm \
-   --link $SIM_HOST \
-   --network $DOCKER_NETWORK \
-   --name $NEWMAN_HOST \
-   --env collection=$collection \
-   --env environment=$environment \
-   --env outfile=$outfile \
-   -v=$(pwd)/environments:/environments \
-   $NEWMAN_IMAGE:$NEWMAN_TAG \
-   /bin/sh \
-   -c "newman run $collection -e $environment --delay-request 1000 --reporters cli,html --reporter-html-export /environments/$outfile --reporter-html-template /environments/newmanReportTemplate.hbs"
+    echo "Running $NEWMAN_HOST"
+    docker run -i --rm \
+        --link $SIM_HOST \
+        --network $DOCKER_NETWORK \
+        --name $NEWMAN_HOST \
+        --env collection=$collection \
+        --env environment=$environment \
+        --env outfile=$outfile \
+        -v=$(pwd)/environments:/environments \
+        $NEWMAN_IMAGE:$NEWMAN_TAG \
+        /bin/sh \
+        -c "newman run $collection -e $environment --delay-request 2000 --reporters cli,html --reporter-html-export /environments/$outfile --reporter-html-template /environments/newmanReportTemplate.hbs"
 }
 
 stop_docker() {
