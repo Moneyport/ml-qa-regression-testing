@@ -60,10 +60,10 @@ endwhile (No)
 (A)
 :Destroy Simulator Docker Container;
 :Finalise Report;
-:Prepare email;
+:Prepare Notification(s);
 :Attach Reports;
-:Send out Email;
-note right: The Attachment (Generated Report) \nis sent as an attachment \nin an email to each of the \nrecipients requested to receive it.
+:Send out Notification(s);
+note right: The Attachment (Generated Report) \nis sent as an attachment \nto the different notification channels.
 :Destroy Regression Test Docker Container;
 stop
 
